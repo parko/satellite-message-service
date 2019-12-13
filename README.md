@@ -1,1 +1,1 @@
-# sattelite-message-service
+# satellite-message-service
