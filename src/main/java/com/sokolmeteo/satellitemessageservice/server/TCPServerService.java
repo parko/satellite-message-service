@@ -128,7 +128,7 @@ public class TCPServerService extends Thread {
         public void run() {
             while (active && !Thread.currentThread().isInterrupted()) {
                 try {
-                    byte[] stream = TCPServerUtils.readBytes(inputStream);
+                    byte[] stream = TCPServerUtils.readBytes(inputStream, serverProperties.getMaxMessageSize());
                     if (stream == null) break;
                     if (stream.length > serverProperties.getMaxMessageSize()) {
                         log.warn("Message is too big");
