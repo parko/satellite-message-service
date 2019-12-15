@@ -31,5 +31,5 @@ public class IridiumMessage {
     private Integer payloadLength;
     private String payload;
     private int errorCounter;
-    private boolean isSent = false;
+    private boolean sent = false;
 }

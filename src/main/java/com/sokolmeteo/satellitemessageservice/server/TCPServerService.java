@@ -1,6 +1,6 @@
 package com.sokolmeteo.satellitemessageservice.server;
 
-import com.sokolmeteo.satellitemessageservice.config.properties.ServerProperties;
+import com.sokolmeteo.satellitemessageservice.config.properties.AppilcationProperties;
 import com.sokolmeteo.satellitemessageservice.dto.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +18,10 @@ import java.util.LinkedList;
 
 @Slf4j
 @Service
-@EnableConfigurationProperties(ServerProperties.class)
+@EnableConfigurationProperties(AppilcationProperties.class)
 @RequiredArgsConstructor
 public class TCPServerService extends Thread {
-    private final ServerProperties serverProperties;
+    private final AppilcationProperties appilcationProperties;
     private final TCPServerMessageProcessor messageProcessor;
 
     private boolean running = false;
@@ -43,7 +43,7 @@ public class TCPServerService extends Thread {
             try {
                 serverSocket.close();
             } catch (IOException e) {
-                log.warn("Error on closing server socket to port " + serverProperties.getPort() + ": " + e.toString());
+                log.warn("Error on closing server socket to port " + appilcationProperties.getPort() + ": " + e.toString());
             }
         }
     }
@@ -52,10 +52,10 @@ public class TCPServerService extends Thread {
         running = true;
 
         try {
-            bind(serverProperties.getPort());
+            bind(appilcationProperties.getPort());
             listen();
         } catch (IOException e) {
-            log.error("Error on starting server on port " + serverProperties.getPort() + " caused by " + e.toString() + ";");
+            log.error("Error on starting server on port " + appilcationProperties.getPort() + " caused by " + e.toString() + ";");
         }
     }
 
@@ -67,7 +67,7 @@ public class TCPServerService extends Thread {
         while (running) {
             Socket socket = serverSocket.accept();
             socket.setSoLinger(true, 1);
-            socket.setSoTimeout(serverProperties.getSocketTimeout());
+            socket.setSoTimeout(appilcationProperties.getSocketTimeout());
 
             Connection connection = new Connection(socket);
             connection.init();
@@ -128,9 +128,9 @@ public class TCPServerService extends Thread {
         public void run() {
             while (active && !Thread.currentThread().isInterrupted()) {
                 try {
-                    byte[] stream = TCPServerUtils.readBytes(inputStream, serverProperties.getMaxMessageSize());
+                    byte[] stream = TCPServerUtils.readBytes(inputStream, appilcationProperties.getMaxMessageSize());
                     if (stream == null) break;
-                    if (stream.length > serverProperties.getMaxMessageSize()) {
+                    if (stream.length > appilcationProperties.getMaxMessageSize()) {
                         log.warn("Message is too big");
                         close();
                         return;
@@ -138,7 +138,7 @@ public class TCPServerService extends Thread {
                     messageProcessor.processMessage(client, stream);
 
                     try {
-                        sleep(serverProperties.getIncomingMessageInterval());
+                        sleep(appilcationProperties.getIncomingMessageInterval());
                     } catch (InterruptedException e) {
                         log.error("Thread interruption exception");
                     }

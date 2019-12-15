@@ -1,4 +1,5 @@
 package com.sokolmeteo.satellitemessageservice.dto;
 
-public class SokolMessage {
+public class LoginSokolMessage {
+
 }
