@@ -104,7 +104,7 @@ public class MessageService {
     }
 
     String generateLoginMessage(String imei) {
-        return String.format("#L#%s;%s", imei, appilcationProperties.getSokolPassword());
+        return String.format("#L#%s;%s\r\n", imei, appilcationProperties.getSokolPassword());
     }
 
     String iridiumToBlackMessage(List<IridiumMessage> messages) {
@@ -157,6 +157,7 @@ public class MessageService {
             sokolMessage.append(payload.getSoilTemperature());
             sokolMessage.append("|");
         }
+        sokolMessage.append("\r\n");
         return sokolMessage.toString();
     }
 

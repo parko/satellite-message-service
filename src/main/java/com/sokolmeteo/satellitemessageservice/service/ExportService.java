@@ -1,26 +1,40 @@
 package com.sokolmeteo.satellitemessageservice.service;
 
+import com.sokolmeteo.satellitemessageservice.config.properties.AppilcationProperties;
 import com.sokolmeteo.satellitemessageservice.dto.IridiumMessage;
+import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
 import com.sokolmeteo.satellitemessageservice.server.TCPClientService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExportService {
+    private final AppilcationProperties appilcationProperties;
     private final TCPClientService tcpClientService;
     private final MessageService messageService;
+    private final IridiumMessageRepository iridiumMessageRepository;
 
-    public void exportMessages(List<IridiumMessage> messages) {
-        Map<String, List<IridiumMessage>> grouppedMessages = groupByImei(messages);
-        Set<String> imeis = grouppedMessages.keySet();
-        for (String imei : imeis) {
-            tcpClientService.sendMessage(messageService.generateLoginMessage(imei));
-            tcpClientService.sendMessage(messageService.iridiumToBlackMessage(grouppedMessages.get(imei)));
+    public void exportMessages() {
+        List<IridiumMessage> iridiumMessages = iridiumMessageRepository.findByErrorCounterAndSent(0, false);
+        if (iridiumMessages.size() > 0) {
+            Map<String, List<IridiumMessage>> grouppedMessages = groupByImei(iridiumMessages);
+
+            for (String imei : grouppedMessages.keySet()) {
+                List<IridiumMessage> messages = grouppedMessages.get(imei);
+                boolean response = tcpClientService.sendMessage(
+                        messageService.generateLoginMessage(imei),
+                        messageService.iridiumToBlackMessage(messages),
+                        appilcationProperties.getSokolPort());
+                if (response) {
+                    for (IridiumMessage message : messages) {
+                        message.setSent(true);
+                    }
+                    iridiumMessageRepository.saveAll(messages);
+                }
+            }
         }
     }
 

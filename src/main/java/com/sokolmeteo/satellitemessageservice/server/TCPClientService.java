@@ -1,5 +1,7 @@
 package com.sokolmeteo.satellitemessageservice.server;
 
+import java.io.IOException;
+
 public interface TCPClientService {
-    void sendMessage(String message);
+    boolean sendMessage(String loginMessage, String blackMessage, int port);
 }
