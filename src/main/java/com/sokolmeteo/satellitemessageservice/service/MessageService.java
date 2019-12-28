@@ -179,7 +179,7 @@ public class MessageService {
         payload.setErrors((int) TCPServerUtils.byteArrayToLong(byteError, 0, 1));
 
         byte[] byteCount = {Byte.parseByte(tokenizer.nextToken())};
-        payload.setErrors((int) TCPServerUtils.byteArrayToLong(byteCount, 0, 1));
+        payload.setCount((int) TCPServerUtils.byteArrayToLong(byteCount, 0, 1));
 
         byte[] byteVoltage1 = {Byte.parseByte(tokenizer.nextToken())};
         payload.setVoltage1(((float) TCPServerUtils.byteArrayToLong(byteVoltage1, 0, 1)) * 2 / 100);
