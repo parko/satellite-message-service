@@ -1,4 +1,4 @@
-package com.sokolmeteo.satellitemessageservice.dto.enumerations;
+package com.sokolmeteo.satellitemessageservice.dto.enums;
 
 public enum CardinalDirections {
     NORTH("N;"),
@@ -15,4 +15,5 @@ public enum CardinalDirections {
     public String getLiteral() {
         return literal;
     }
+
 }

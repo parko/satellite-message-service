@@ -1,6 +1,6 @@
 package com.sokolmeteo.satellitemessageservice.dto;
 
-import com.sokolmeteo.satellitemessageservice.dto.enumerations.CardinalDirections;
+import com.sokolmeteo.satellitemessageservice.dto.enums.CardinalDirections;
 import lombok.Data;
 
 import javax.persistence.*;

@@ -1,4 +1,4 @@
-package com.sokolmeteo.satellitemessageservice.server;
+package com.sokolmeteo.satellitemessageservice.tcp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -10,6 +10,7 @@ public class TCPServerUtils {
         byte[] bytes = new byte[maxSize];
         int n;
         n = inputStream.read(bytes);
+        if (n == -1) return null;
         outputStream.write(bytes, 0, n);
         return outputStream.toByteArray();
     }
