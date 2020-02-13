@@ -3,15 +3,12 @@ package com.sokolmeteo.satellitemessageservice.tcp;
 import com.sokolmeteo.satellitemessageservice.dto.IridiumMessage;
 import com.sokolmeteo.satellitemessageservice.dto.Payload;
 import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
-import com.sokolmeteo.satellitemessageservice.tcp.TCPClient;
-import com.sokolmeteo.satellitemessageservice.tcp.TCPServerUtils;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@EnableScheduling
 public class TCPClientService {
     private final TCPClient client;
     private final IridiumMessageRepository repository;
@@ -23,6 +20,7 @@ public class TCPClientService {
 
     @Scheduled(fixedDelay = 60000)
     public void export() {
+        System.out.println("Export messages");
         List<IridiumMessage> iridiumMessages = repository.findByErrorCounterAndSent(0, false);
         if (iridiumMessages.size() > 0) {
             Map<String, List<IridiumMessage>> groupedMessages = groupByImei(iridiumMessages);
@@ -36,7 +34,8 @@ public class TCPClientService {
                     repository.saveAll(messages);
                 }
             }
-        }
+            System.out.println("Export is successful");
+        } else System.out.println("Nothing to export");
     }
 
     private Map<String, List<IridiumMessage>> groupByImei(List<IridiumMessage> messages) {

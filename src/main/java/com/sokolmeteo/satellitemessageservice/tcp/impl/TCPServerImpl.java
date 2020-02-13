@@ -41,8 +41,8 @@ public class TCPServerImpl extends Thread implements TCPServer {
 
     @PreDestroy
     public void stopServer() {
-        running = false;
         disconnectConnections();
+        running = false;
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
@@ -150,6 +150,7 @@ public class TCPServerImpl extends Thread implements TCPServer {
                     messageProcessor.processMessage(stream);
 
                     try {
+                        System.out.println("Sleeping...");
                         sleep(incomingMessageInterval);
                     } catch (InterruptedException e) {
                         System.out.println("Thread interruption exception " + e);

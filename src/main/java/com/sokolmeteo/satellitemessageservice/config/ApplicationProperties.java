@@ -1,9 +1,9 @@
 package com.sokolmeteo.satellitemessageservice.config;
 
-import lombok.Getter;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Getter
+@Data
 @ConfigurationProperties(prefix = "satellite")
 public class ApplicationProperties {
     private int serverPort;
