@@ -3,6 +3,7 @@ package com.sokolmeteo.satellitemessageservice.tcp;
 import com.sokolmeteo.satellitemessageservice.dto.IridiumMessage;
 import com.sokolmeteo.satellitemessageservice.dto.Payload;
 import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
+import lombok.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -12,6 +13,8 @@ import java.util.*;
 public class TCPClientService {
     private final TCPClient client;
     private final IridiumMessageRepository repository;
+
+    private final static int MESSAGE_PACKET_SIZE = 4;
 
     public TCPClientService(TCPClient client, IridiumMessageRepository repository) {
         this.client = client;
@@ -23,33 +26,49 @@ public class TCPClientService {
         System.out.println("Export messages");
         List<IridiumMessage> iridiumMessages = repository.findByErrorCounterAndSent(0, false);
         if (iridiumMessages.size() > 0) {
-            Map<String, List<IridiumMessage>> groupedMessages = groupByImei(iridiumMessages);
-            for (String imei : groupedMessages.keySet()) {
-                List<IridiumMessage> messages = groupedMessages.get(imei);
-                boolean response = client.sendMessage(imei, getBlackMessage(messages));
-                if (response) {
-                    for (IridiumMessage message : messages) {
-                        message.setSent(true);
+            Map<String, List<List<IridiumMessage>>> sorted = sortByImei(iridiumMessages);
+            for (String imei : sorted.keySet()) {
+                for (List<IridiumMessage> messages : sorted.get(imei)) {
+                    boolean response = client.sendMessage(imei, getBlackMessage(messages));
+                    if (response) {
+                        for (IridiumMessage message : messages) {
+                            message.setSent(true);
+                        }
+                        repository.saveAll(messages);
                     }
-                    repository.saveAll(messages);
                 }
             }
             System.out.println("Export is successful");
         } else System.out.println("Nothing to export");
     }
 
-    private Map<String, List<IridiumMessage>> groupByImei(List<IridiumMessage> messages) {
-        Map<String, List<IridiumMessage>> grouppedMessages = new HashMap<>();
-        for (IridiumMessage message : messages) {
-            if (grouppedMessages.containsKey(message.getImei())) {
-                grouppedMessages.get(message.getImei()).add(message);
+    private Map<String, List<List<IridiumMessage>>> sortByImei(@NonNull List<IridiumMessage> rawMessages) {
+        Map<String, List<IridiumMessage>> sorted = new HashMap<>();
+        for (IridiumMessage message : rawMessages) {
+            if (sorted.containsKey(message.getImei())) {
+                sorted.get(message.getImei()).add(message);
             } else {
-                List<IridiumMessage> messages1 = new ArrayList<>();
-                messages1.add(message);
-                grouppedMessages.put(message.getImei(), messages1);
+                List<IridiumMessage> messages = new ArrayList<>();
+                messages.add(message);
+                sorted.put(message.getImei(), messages);
             }
         }
-        return grouppedMessages;
+
+        Map<String, List<List<IridiumMessage>>> groupedMap = new HashMap<>();
+        for (String imei : sorted.keySet()) {
+            List<List<IridiumMessage>> grouped = new ArrayList<>();
+            List<IridiumMessage> messages = new ArrayList<>();
+            Iterator<IridiumMessage> iterator = sorted.get(imei).iterator();
+            while (iterator.hasNext()) {
+                messages.add(iterator.next());
+                if (messages.size() >= MESSAGE_PACKET_SIZE || !iterator.hasNext()) {
+                    grouped.add(messages);
+                    messages = new ArrayList<>();
+                }
+            }
+            groupedMap.put(imei, grouped);
+        }
+        return groupedMap;
     }
 
     String getBlackMessage(List<IridiumMessage> messages) {

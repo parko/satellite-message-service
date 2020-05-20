@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.sokolmeteo</groupId>
     <artifactId>satellite-message-service</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <name>satellite-message-service</name>
-    <description>Satellite message receiver and retranslator</description>
+    <description>Satellite message receiver and repeater</description>
     <packaging>jar</packaging>
 
     <properties>
