@@ -6,6 +6,7 @@ import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
 import lombok.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -13,6 +14,10 @@ import java.util.*;
 public class TCPClientService {
     private final TCPClient client;
     private final IridiumMessageRepository repository;
+
+    final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyy");
+    final SimpleDateFormat timeFormatter = new SimpleDateFormat("HHmmss");
+
 
     private final static int MESSAGE_PACKET_SIZE = 4;
 
@@ -71,13 +76,15 @@ public class TCPClientService {
         return groupedMap;
     }
 
-    String getBlackMessage(List<IridiumMessage> messages) {
+    private String getBlackMessage(List<IridiumMessage> messages) {
         StringBuilder sokolMessage = new StringBuilder("#B#");
+
         for (IridiumMessage message : messages) {
-            Payload payload = getPayload(message.getPayload());
-            sokolMessage.append(payload.getDate());
+            boolean isLongFormat = message.getPayload().length() > 100;
+
+            sokolMessage.append(dateFormatter.format(message.getEventDate()));
             sokolMessage.append(";");
-            sokolMessage.append(payload.getTime());
+            sokolMessage.append(timeFormatter.format(message.getEventDate()));
             sokolMessage.append(";");
             sokolMessage.append(message.getLatitude());
             sokolMessage.append(";");
@@ -89,37 +96,46 @@ public class TCPClientService {
             sokolMessage.append(message.getHeight() != null ? message.getHeight() : "NA");
             sokolMessage.append(";");
             sokolMessage.append("0;NA;0;0;NA;NA;");
-            sokolMessage.append("ER:1:");
-            sokolMessage.append(payload.getErrors());
-            sokolMessage.append(",TR:1:");
-            sokolMessage.append(payload.getCount());
-            sokolMessage.append(",Upow:2:");
-            sokolMessage.append(payload.getVoltage1());
-            sokolMessage.append(",ExtUpow:2:");
-            sokolMessage.append(payload.getVoltage2());
-            sokolMessage.append(",Temp:2:");
-            sokolMessage.append(payload.getTemperature());
-            sokolMessage.append(",PR:2:");
-            sokolMessage.append(payload.getPressure());
-            sokolMessage.append(",HM:1:");
-            sokolMessage.append(payload.getMoisture());
-            sokolMessage.append(",WV:2:");
-            sokolMessage.append(payload.getWindSpeed());
-            sokolMessage.append(",WD:1:");
-            sokolMessage.append(payload.getWindDirection());
-            sokolMessage.append(",MWV:2:");
-            sokolMessage.append(payload.getWindFlaw());
-            sokolMessage.append(",RN:2:");
-            sokolMessage.append(payload.getPrecipitation());
-            sokolMessage.append(",SR:2:");
-            sokolMessage.append(payload.getSolarRadiation());
-            sokolMessage.append(",SH:1:");
-            sokolMessage.append(payload.getSnowDepth());
-            sokolMessage.append(",HG:1:");
-            sokolMessage.append(payload.getSoilMoisture());
-            sokolMessage.append(",TG:1:");
-            sokolMessage.append(payload.getSoilTemperature());
-            sokolMessage.append("|");
+
+            if (!isLongFormat) {
+                Payload payload = getPayload(message.getPayload());
+
+                sokolMessage.append("ER:1:");
+                sokolMessage.append(payload.getErrors());
+                sokolMessage.append(",TR:1:");
+                sokolMessage.append(payload.getCount());
+                sokolMessage.append(",Upow:2:");
+                sokolMessage.append(payload.getVoltage1());
+                sokolMessage.append(",ExtUpow:2:");
+                sokolMessage.append(payload.getVoltage2());
+                sokolMessage.append(",Temp:2:");
+                sokolMessage.append(payload.getTemperature());
+                sokolMessage.append(",PR:2:");
+                sokolMessage.append(payload.getPressure());
+                sokolMessage.append(",HM:1:");
+                sokolMessage.append(payload.getMoisture());
+                sokolMessage.append(",WV:2:");
+                sokolMessage.append(payload.getWindSpeed());
+                sokolMessage.append(",WD:1:");
+                sokolMessage.append(payload.getWindDirection());
+                sokolMessage.append(",MWV:2:");
+                sokolMessage.append(payload.getWindFlaw());
+                sokolMessage.append(",RN:2:");
+                sokolMessage.append(payload.getPrecipitation());
+                sokolMessage.append(",SR:2:");
+                sokolMessage.append(payload.getSolarRadiation());
+                sokolMessage.append(",SH:1:");
+                sokolMessage.append(payload.getSnowDepth());
+                sokolMessage.append(",HG:1:");
+                sokolMessage.append(payload.getSoilMoisture());
+                sokolMessage.append(",TG:1:");
+                sokolMessage.append(payload.getSoilTemperature());
+                sokolMessage.append("|");
+            }
+            else {
+                sokolMessage.append(message.getPayload());
+                sokolMessage.append("|");
+            }
         }
         sokolMessage.append("\r\n");
         return sokolMessage.toString();

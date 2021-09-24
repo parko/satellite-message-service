@@ -89,13 +89,31 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 cursor++;
                 iridiumMessage.setPayloadLength(TCPServerUtils.byteArrayToInt(message, cursor, 2));
                 cursor += 2;
-                StringBuilder payload = new StringBuilder("[ ");
-                for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
-                    payload.append(message[i]);
-                    payload.append(" ");
+
+                boolean isLongMessage = iridiumMessage.getPayloadLength() > 100;
+
+
+                String str;
+                if (!isLongMessage) {
+                    StringBuilder payload = new StringBuilder();
+                    payload.append("[ ");
+                    for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
+                        payload.append(message[i]);
+                        payload.append(" ");
+                    }
+                    payload.append("]");
+                    str = payload.toString();
                 }
-                payload.append("]");
-                iridiumMessage.setPayload(payload.toString());
+                else {
+                    byte [] array = new byte[iridiumMessage.getPayloadLength()];
+                    int arrayIndex = 0;
+                    for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
+                        array[arrayIndex] = message[i];
+                        arrayIndex++;
+                    }
+                    str = new String(array);
+                }
+                iridiumMessage.setPayload(str);
             } else {
                 error++;
                 System.out.println("Payload part is absent");
