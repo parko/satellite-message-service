@@ -4,9 +4,8 @@ import com.sokolmeteo.satellitemessageservice.dto.IridiumMessage;
 import com.sokolmeteo.satellitemessageservice.dto.Payload;
 import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
 import lombok.NonNull;
-import org.springframework.scheduling.annotation.EnableScheduling;
+
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,8 +14,14 @@ public class TCPClientService {
     private final TCPClient client;
     private final IridiumMessageRepository repository;
 
-    final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyy");
-    final SimpleDateFormat timeFormatter = new SimpleDateFormat("HHmmss");
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyy");
+    private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("HHmmss");
+
+    static {
+        dateFormatter.setTimeZone(UTC);
+        timeFormatter.setTimeZone(UTC);
+    }
 
 
     private final static int MESSAGE_PACKET_SIZE = 4;
