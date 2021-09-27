@@ -12,6 +12,7 @@ import java.util.BitSet;
 import java.util.Date;
 
 public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
+    private final String END_LINE = "\r\n";
     private final IridiumMessageRepository iridiumMessageRepository;
 
     public IridiumMessageProcessorImpl(IridiumMessageRepository iridiumMessageRepository) {
@@ -90,11 +91,11 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 iridiumMessage.setPayloadLength(TCPServerUtils.byteArrayToInt(message, cursor, 2));
                 cursor += 2;
 
-                boolean isLongMessage = iridiumMessage.getPayloadLength() > 100;
-
+                boolean isLongFormat = iridiumMessage.getPayloadLength() > 100;
+                System.out.println("isLongFormat: " + isLongFormat);
 
                 String str;
-                if (!isLongMessage) {
+                if (!isLongFormat) {
                     StringBuilder payload = new StringBuilder();
                     payload.append("[ ");
                     for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
@@ -112,6 +113,11 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                         arrayIndex++;
                     }
                     str = new String(array);
+                    System.out.println("before: '" + str + "'");
+                    if (str.endsWith(END_LINE)) {
+                        str = str.substring(0, str.length() - END_LINE.length());
+                        System.out.println("after: '" + str + "'");
+                    }
                 }
                 iridiumMessage.setPayload(str);
             } else {

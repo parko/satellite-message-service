@@ -78,9 +78,12 @@ public class TCPClientService {
 
     private String getBlackMessage(List<IridiumMessage> messages) {
         StringBuilder sokolMessage = new StringBuilder("#B#");
+        System.out.println("Send message");
 
         for (IridiumMessage message : messages) {
             boolean isLongFormat = message.getPayload().length() > 100;
+
+            System.out.println("isLongFormat: " + isLongFormat);
 
             sokolMessage.append(dateFormatter.format(message.getEventDate()));
             sokolMessage.append(";");
@@ -138,6 +141,7 @@ public class TCPClientService {
             }
         }
         sokolMessage.append("\r\n");
+        System.out.println(sokolMessage.toString());
         return sokolMessage.toString();
     }
 
