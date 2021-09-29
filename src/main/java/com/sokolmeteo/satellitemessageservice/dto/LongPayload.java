@@ -8,21 +8,21 @@ public class LongPayload {
     private String time;
     private int errors; //err
     private int count; //прошивка?
-    private float voltage1; //U
-    private float voltage2; //Uex
-    private float temperature; //t
-    private float pressure; //PR
-    private int moisture; //HM
-    private float windSpeed; //WV
-    private int windDirection; //WD
-    private float windFlaw; //VM
-    private float precipitation; //RN
-    private int solarRadiation; //GM
-    private float ultraviolet; //UV
-    private int illumination; //L
-    private int windDirectionUZ; //AD
-    private float windSpeedUZ; //AV
-    private int snowCover; //L0
+    private float u; //U
+    private float uEx; //Uex
+    private float t; //t
+    private float pR; //PR
+    private int hM; //HM
+    private float wV; //WV
+    private int wD; //WD
+    private float vM; //VM
+    private float rN; //RN
+    private int gM; //GM
+    private float uV; //UV
+    private int l; //L
+    private int aD; //AD
+    private float aV; //AV
+    private int l0; //L0
 
     private int reserve1;
     private int reserve2;

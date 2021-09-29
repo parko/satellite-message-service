@@ -143,38 +143,31 @@ public class TCPClientService {
             }
             else {
                 LongPayload longPayload = getLongPayload(message.getPayload());
-                sokolMessage.append("ER:2:");
-                sokolMessage.append(longPayload.getErrors());
-                sokolMessage.append(",TR:2:");
-                sokolMessage.append(longPayload.getCount());
-                sokolMessage.append(",Upow:2:");
-                sokolMessage.append(longPayload.getVoltage1());
-                sokolMessage.append(",ExtUpow:2:");
-                sokolMessage.append(longPayload.getVoltage2());
-                sokolMessage.append(",t:2:");
-                sokolMessage.append(longPayload.getTemperature());
+
+                sokolMessage.append("t:2:");
+                sokolMessage.append(longPayload.getT());
                 sokolMessage.append(",PR:2:");
-                sokolMessage.append(longPayload.getPressure());
+                sokolMessage.append(longPayload.getPR());
                 sokolMessage.append(",HM:2:");
-                sokolMessage.append(longPayload.getMoisture());
+                sokolMessage.append(longPayload.getHM());
                 sokolMessage.append(",WV:2:");
-                sokolMessage.append(longPayload.getWindSpeed());
+                sokolMessage.append(longPayload.getWV());
                 sokolMessage.append(",WD:2:");
-                sokolMessage.append(longPayload.getWindDirection());
+                sokolMessage.append(longPayload.getWD());
                 sokolMessage.append(",RN:2:");
-                sokolMessage.append(longPayload.getPrecipitation());
+                sokolMessage.append(longPayload.getRN());
                 sokolMessage.append(",UV:2:");
-                sokolMessage.append(longPayload.getUltraviolet());
+                sokolMessage.append(longPayload.getUV());
                 sokolMessage.append(",L:2:");
-                sokolMessage.append(longPayload.getIllumination());
+                sokolMessage.append(longPayload.getL());
                 sokolMessage.append(",AV:2:");
-                sokolMessage.append(longPayload.getWindSpeedUZ());
+                sokolMessage.append(longPayload.getAV());
                 sokolMessage.append(",AD:2:");
-                sokolMessage.append(longPayload.getWindDirectionUZ());
+                sokolMessage.append(longPayload.getAD());
                 sokolMessage.append(",L0:2:");
-                sokolMessage.append(longPayload.getSnowCover());
+                sokolMessage.append(longPayload.getL0());
                 sokolMessage.append(",GM:2:");
-                sokolMessage.append(longPayload.getSolarRadiation());
+                sokolMessage.append(longPayload.getGM());
                 sokolMessage.append(",EX01:2:");
                 sokolMessage.append(longPayload.getEx01());
                 sokolMessage.append(",EX02:2:");
@@ -317,8 +310,14 @@ public class TCPClientService {
                 sokolMessage.append(longPayload.getReserve3());
                 sokolMessage.append(",R4:2:");
                 sokolMessage.append(longPayload.getReserve4());
+                sokolMessage.append(",Upow:2:");
+                sokolMessage.append(longPayload.getU());
+                sokolMessage.append(",ExtUpow:2:");
+                sokolMessage.append(longPayload.getUEx());
                 sokolMessage.append(",VM:2:");
-                sokolMessage.append(longPayload.getWindFlaw());
+                sokolMessage.append(longPayload.getVM());
+                sokolMessage.append(",ER:2:");
+                sokolMessage.append(longPayload.getErrors());
 
                 sokolMessage.append("|");
             }
@@ -413,39 +412,39 @@ public class TCPClientService {
         longPayload.setTime(timeFormatter.format(date.getTime()));
 
         byte[] byteTemperature = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setTemperature(((float) TCPServerUtils.byteArrayToInt(byteTemperature, 0, 2)) / 100);
+        longPayload.setT(((float) TCPServerUtils.byteArrayToInt(byteTemperature, 0, 2)) / 100);
 
         byte[] bytePressure = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setPressure(((float) TCPServerUtils.byteArrayToLong(bytePressure, 0, 2)) / 100); // Умножаем на три?
+        longPayload.setPR(((float) TCPServerUtils.byteArrayToLong(bytePressure, 0, 2)) / 100); // Умножаем на три?
 
-        longPayload.setMoisture(Byte.parseByte(tokenizer.nextToken()));
+        longPayload.setHM(Byte.parseByte(tokenizer.nextToken()));
 
         byte[] byteWindSpeed = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setWindSpeed(((float) TCPServerUtils.byteArrayToInt(byteWindSpeed, 0, 2)) / 100);
+        longPayload.setWV(((float) TCPServerUtils.byteArrayToInt(byteWindSpeed, 0, 2)) / 100);
 
         byte[] byteWindDirection = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setWindDirection(TCPServerUtils.byteArrayToInt(byteWindDirection, 0, 2));
+        longPayload.setWD(TCPServerUtils.byteArrayToInt(byteWindDirection, 0, 2));
 
         byte[] bytePrecipitation = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setPrecipitation(((float) TCPServerUtils.byteArrayToLong(bytePrecipitation, 0, 2)) / 10);
+        longPayload.setRN(((float) TCPServerUtils.byteArrayToLong(bytePrecipitation, 0, 2)) / 10);
 
         byte[] byteUltraViolet = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setUltraviolet(((float) TCPServerUtils.byteArrayToLong(byteUltraViolet, 0, 2)) / 100);
+        longPayload.setUV(((float) TCPServerUtils.byteArrayToLong(byteUltraViolet, 0, 2)) / 100);
 
         byte[] byteIllumination = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setIllumination((int) TCPServerUtils.byteArrayToLong(byteIllumination, 0, 2));
+        longPayload.setL((int) TCPServerUtils.byteArrayToLong(byteIllumination, 0, 2));
 
         byte[] byteWindSpeedUZ = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setUltraviolet(((float) TCPServerUtils.byteArrayToLong(byteWindSpeedUZ, 0, 2)) / 100);
+        longPayload.setAV(((float) TCPServerUtils.byteArrayToLong(byteWindSpeedUZ, 0, 2)) / 100);
 
         byte[] byteWindDirectionUZ = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setWindDirectionUZ(((int) TCPServerUtils.byteArrayToLong(byteWindDirectionUZ, 0, 2)));
+        longPayload.setAD(((int) TCPServerUtils.byteArrayToLong(byteWindDirectionUZ, 0, 2)));
 
         byte[] byteSnowCover = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setSnowCover(((int) TCPServerUtils.byteArrayToLong(byteSnowCover, 0, 2)));
+        longPayload.setL0(((int) TCPServerUtils.byteArrayToLong(byteSnowCover, 0, 2)));
 
         byte[] byteSolarRadiation = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setSolarRadiation(((int) TCPServerUtils.byteArrayToLong(byteSolarRadiation, 0, 2)));
+        longPayload.setGM(((int) TCPServerUtils.byteArrayToLong(byteSolarRadiation, 0, 2)));
 
 
 
@@ -664,13 +663,13 @@ public class TCPClientService {
         longPayload.setReserve4(((int) TCPServerUtils.byteArrayToLong(byteReserve4, 0, 2)));
 
         byte[] byteVoltage1 = {Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setVoltage1(((float) TCPServerUtils.byteArrayToLong(byteVoltage1, 0, 2)) / 100);
+        longPayload.setU(((float) TCPServerUtils.byteArrayToLong(byteVoltage1, 0, 2)) / 100);
 
         byte[] byteVoltage2 = {Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setVoltage2(((float) TCPServerUtils.byteArrayToLong(byteVoltage2, 0, 2)) / 100);
+        longPayload.setUEx(((float) TCPServerUtils.byteArrayToLong(byteVoltage2, 0, 2)) / 100);
 
         byte[] byteWindFlaw = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setWindFlaw(((float) TCPServerUtils.byteArrayToInt(byteWindFlaw, 0, 2)) / 100);
+        longPayload.setVM(((float) TCPServerUtils.byteArrayToInt(byteWindFlaw, 0, 2)) / 100);
 
         byte[] byteError = {Byte.parseByte(tokenizer.nextToken())};
         longPayload.setErrors((int) TCPServerUtils.byteArrayToLong(byteError, 0, 2));
