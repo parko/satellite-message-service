@@ -91,15 +91,35 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 iridiumMessage.setPayloadLength(TCPServerUtils.byteArrayToInt(message, cursor, 2));
                 cursor += 2;
 
-                StringBuilder payload = new StringBuilder();
-                payload.append("[ ");
-                for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
-                    payload.append(message[i]);
-                    payload.append(" ");
-                }
-                payload.append("]");
+                boolean isLongFormat = iridiumMessage.getPayloadLength() > 100;
+                System.out.println("isLongFormat: " + isLongFormat);
 
-                iridiumMessage.setPayload(payload.toString());
+                String str;
+                if (!isLongFormat) {
+                    StringBuilder payload = new StringBuilder();
+                    payload.append("[ ");
+                    for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
+                        payload.append(message[i]);
+                        payload.append(" ");
+                    }
+                    payload.append("]");
+                    str = payload.toString();
+                }
+                else {
+                    byte [] array = new byte[iridiumMessage.getPayloadLength()];
+                    int arrayIndex = 0;
+                    for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
+                        array[arrayIndex] = message[i];
+                        arrayIndex++;
+                    }
+                    str = new String(array);
+                    System.out.println("before: '" + str + "'");
+                    if (str.endsWith(END_LINE)) {
+                        str = str.substring(0, str.length() - END_LINE.length());
+                        System.out.println("after: '" + str + "'");
+                    }
+                }
+                iridiumMessage.setPayload(str);
             } else {
                 error++;
                 System.out.println("Payload part is absent");
