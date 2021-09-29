@@ -391,6 +391,17 @@ public class TCPClientService {
         LongPayload longPayload = new LongPayload();
         StringTokenizer tokenizer = new StringTokenizer(string, "[ ]");
 
+        //TODO: пока пропускаем блок с валидностью (6 слов по 2 байта)
+        tokenizer.nextToken();
+        tokenizer.nextToken();
+        tokenizer.nextToken();
+        tokenizer.nextToken();
+        tokenizer.nextToken();
+        tokenizer.nextToken();
+
+        //TODO: пока пропускаем блок с ошибками и т.д.
+        tokenizer.nextToken();
+
         byte[] byteDate = {Byte.parseByte(tokenizer.nextToken()),
                 Byte.parseByte(tokenizer.nextToken()),
                 Byte.parseByte(tokenizer.nextToken()),
@@ -400,12 +411,6 @@ public class TCPClientService {
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HHmmss");
         longPayload.setDate(dateFormatter.format(date.getTime()));
         longPayload.setTime(timeFormatter.format(date.getTime()));
-
-        byte[] byteError = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setErrors((int) TCPServerUtils.byteArrayToLong(byteError, 0, 2));
-
-        byte[] byteCount = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
-        longPayload.setCount((int) TCPServerUtils.byteArrayToLong(byteCount, 0, 2));
 
         byte[] byteTemperature = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
         longPayload.setTemperature(((float) TCPServerUtils.byteArrayToInt(byteTemperature, 0, 2)) / 100);
@@ -667,6 +672,8 @@ public class TCPClientService {
         byte[] byteWindFlaw = {Byte.parseByte(tokenizer.nextToken()), Byte.parseByte(tokenizer.nextToken())};
         longPayload.setWindFlaw(((float) TCPServerUtils.byteArrayToInt(byteWindFlaw, 0, 2)) / 100);
 
+        byte[] byteError = {Byte.parseByte(tokenizer.nextToken())};
+        longPayload.setErrors((int) TCPServerUtils.byteArrayToLong(byteError, 0, 2));
 
         return longPayload;
     }
