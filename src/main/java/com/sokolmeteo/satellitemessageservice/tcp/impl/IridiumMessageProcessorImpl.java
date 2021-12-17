@@ -189,7 +189,10 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
          * Byte 5 lon degrees
          */
         final byte lonDegByte = byteBuffer.get();
-        final short lonDeg = lonDegByte;
+        int lonDeg = lonDegByte;
+        if (lonDeg < 0) {
+            lonDeg = 256 + lonDeg;
+        }
 
         /**
          * Bytes 6-7 thousands of lon degrees as an unsigned integer
@@ -216,6 +219,9 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
         double latitude = toDecimalDegrees(bytes, cursor);
         cursor += 3;
         double longitude = toDecimalDegrees(bytes, cursor);
+        if (longitude < 0) {
+            longitude = 256D + longitude;
+        }
         return new Location(latitudeDirection, latitude, longitudeDirection, longitude);
     }
 
