@@ -7,7 +7,9 @@ import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
 import com.sokolmeteo.satellitemessageservice.tcp.TCPServerMessageProcessor;
 import com.sokolmeteo.satellitemessageservice.tcp.TCPServerUtils;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Date;
 
@@ -47,6 +49,7 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 byte[] imei = new byte[15];
                 System.arraycopy(message, cursor, imei, 0, 15);
                 iridiumMessage.setImei(new String(imei, StandardCharsets.UTF_8));
+                System.out.println("IMEI:" + iridiumMessage.getImei());
                 cursor += 15;
 
                 iridiumMessage.setSessionStatus(TCPServerUtils.byteArrayToInt(message, cursor++, 1));
@@ -72,6 +75,7 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 cursor++;
                 iridiumMessage.setLocationLength(TCPServerUtils.byteArrayToInt(message, cursor, 2));
                 cursor += 2;
+                printLocation(message, cursor);
                 Location location = getLocation(message, cursor);
                 iridiumMessage.setLatitudeDirection(location.getLatitudeDirection());
                 iridiumMessage.setLatitude(location.getLatitude());
@@ -104,9 +108,8 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                     }
                     payload.append("]");
                     str = payload.toString();
-                }
-                else {
-                    byte [] array = new byte[iridiumMessage.getPayloadLength()];
+                } else {
+                    byte[] array = new byte[iridiumMessage.getPayloadLength()];
                     int arrayIndex = 0;
                     for (int i = cursor; i < cursor + iridiumMessage.getPayloadLength(); i++) {
                         array[arrayIndex] = message[i];
@@ -130,6 +133,77 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
         }
         iridiumMessage.setErrorCounter(error);
         return iridiumMessage;
+
+    }
+
+    private static long getAsUnsignedNumber(final byte[] p_Bytes) {
+        long result = 0L;
+        final int remaining = p_Bytes.length - 1;
+        int bitShifter = remaining * 8;
+        for (int i = 0; i < p_Bytes.length - 1; i++) {
+            final int convertedInt = p_Bytes[i] & 0xFF;
+            result |= convertedInt << bitShifter;
+            bitShifter -= 8;
+        }
+        result = result | p_Bytes[remaining] & 0xFF;
+        return result & 0xFFFFFFFFL;
+    }
+
+    private void printLocation(byte[] bytes, int cursor) {
+        byte[] allbytes = new byte[7];
+        System.arraycopy(bytes, cursor, allbytes, 0, 7);
+        System.out.println("Bytes: " + Arrays.toString(allbytes));
+
+        final byte b1 = bytes[cursor];
+        final String binaryStrByte1 = String
+                .format("%8s", Integer.toBinaryString(b1 & 0xFF))
+                .replace(' ', '0');
+
+        final boolean nsFlag = binaryStrByte1.charAt(6) == '1';
+        CardinalDirections latitudeDirection = nsFlag ? CardinalDirections.SOUTH : CardinalDirections.NORTH;
+
+        final boolean ewFlag = binaryStrByte1.charAt(7) == '1';
+        CardinalDirections longitudeDirection = ewFlag ? CardinalDirections.WEST : CardinalDirections.EAST;
+
+        cursor = cursor + 1;
+
+        final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, cursor, 6);
+
+        /**
+         * Byte 2 lat degs
+         */
+        final byte latDegByte = byteBuffer.get();
+        final short latDeg = latDegByte;
+        /**
+         * Bytes 3-4 thousandth of degree as unsigned int
+         */
+        byte[] dst = new byte[2];
+        byteBuffer.get(dst, 0, 2);
+        final int latDegDecimals = (int) getAsUnsignedNumber(dst);
+
+        final String latDegreesStr = String.format("%s.%s", latDeg,
+                latDegDecimals);
+        final double latDegrees = Double.parseDouble(latDegreesStr);
+
+        /**
+         * Byte 5 lon degrees
+         */
+        final byte lonDegByte = byteBuffer.get();
+        final short lonDeg = lonDegByte;
+
+        /**
+         * Bytes 6-7 thousands of lon degrees as an unsigned integer
+         */
+        dst = new byte[2];
+        byteBuffer.get(dst, 0, 2);
+        final int lonDegDecimals = (int) getAsUnsignedNumber(dst);
+        final String lonDegreesStr = String.format("%s.%s", lonDeg,
+                lonDegDecimals);
+        final double lonDegrees = Double.parseDouble(lonDegreesStr);
+
+        System.out.println(latDegreesStr + latitudeDirection.getLiteral() + ", " + lonDegreesStr + longitudeDirection.getLiteral());
+
+        //        return new Location(latitudeDirection, latDegrees, longitudeDirection, lonDegrees);
 
     }
 
