@@ -220,7 +220,7 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
         cursor += 3;
         double longitude = toDecimalDegrees(bytes, cursor);
         if (longitude < 0) {
-            longitude = 256D + longitude;
+            longitude = (256D * 100D) + longitude;
         }
         return new Location(latitudeDirection, latitude, longitudeDirection, longitude);
     }
