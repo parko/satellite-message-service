@@ -4,6 +4,7 @@ import com.sokolmeteo.satellitemessageservice.dto.IridiumMessage;
 import com.sokolmeteo.satellitemessageservice.dto.Location;
 import com.sokolmeteo.satellitemessageservice.dto.enums.CardinalDirections;
 import com.sokolmeteo.satellitemessageservice.repo.IridiumMessageRepository;
+import com.sokolmeteo.satellitemessageservice.tcp.TCPClientService;
 import com.sokolmeteo.satellitemessageservice.tcp.TCPServerMessageProcessor;
 import com.sokolmeteo.satellitemessageservice.tcp.TCPServerUtils;
 
@@ -95,7 +96,7 @@ public class IridiumMessageProcessorImpl implements TCPServerMessageProcessor {
                 iridiumMessage.setPayloadLength(TCPServerUtils.byteArrayToInt(message, cursor, 2));
                 cursor += 2;
 
-                boolean isLongFormat = iridiumMessage.getPayloadLength() > 100;
+                boolean isLongFormat = iridiumMessage.getPayloadLength() > TCPClientService.LONG_FORMAT_SIZE;
                 System.out.println("isLongFormat: " + isLongFormat);
 
                 String str;

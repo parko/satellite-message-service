@@ -18,6 +18,8 @@ public class TCPClientService {
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyy");
     private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("HHmmss");
 
+    public static final int LONG_FORMAT_SIZE = 65;
+
     static {
         dateFormatter.setTimeZone(UTC);
         timeFormatter.setTimeZone(UTC);
@@ -86,7 +88,7 @@ public class TCPClientService {
         System.out.println("Send message");
 
         for (IridiumMessage message : messages) {
-            boolean isLongFormat = message.getPayload().length() > 100;
+            boolean isLongFormat = message.getPayload().length() > LONG_FORMAT_SIZE;
 
             System.out.println("isLongFormat: " + isLongFormat);
 
