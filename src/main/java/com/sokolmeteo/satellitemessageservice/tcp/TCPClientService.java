@@ -88,7 +88,7 @@ public class TCPClientService {
         System.out.println("Send message");
 
         for (IridiumMessage message : messages) {
-            boolean isLongFormat = message.getPayload().length() > LONG_FORMAT_SIZE;
+            boolean isLongFormat = message.getPayloadLength() > LONG_FORMAT_SIZE;
 
             System.out.println("isLongFormat: " + isLongFormat);
 
